@@ -1,12 +1,12 @@
-use chrono::Local;
-use chrono::TimeZone;
+use chrono::{Local, TimeZone};
 use either::Either;
 use tz_rust::*;
-use clap::Parser;
-use std::error::Error;
-use std::collections::HashMap;
-use std::fmt::Display;
-use clap::ValueEnum;
+use clap::{ValueEnum, Parser};
+use std::{
+    error::Error,
+    collections::HashMap,
+    fmt::Display,
+};
 
 #[derive(Parser)]
 #[command(name = "tz")]

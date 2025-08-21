@@ -1,10 +1,14 @@
-use chrono::prelude::*;
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::{
+    NaiveDate, NaiveDateTime, NaiveTime,
+    prelude::*,
+};
 use chrono_tz::Tz;
 use either::Either;
-use std::collections::HashMap;
-use std::path::Path;
-use std::error::Error;
+use std::{
+    collections::HashMap,
+    path::Path,
+    error::Error,
+};
 
 pub fn parse_dt_parts(parts: &[String], tz_abbr: &HashMap<String, String>) -> Result<(NaiveDateTime, Either<Tz, Local>), &'static str> {
     let now = Local::now();
