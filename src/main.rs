@@ -3,7 +3,6 @@ use chrono::TimeZone;
 use either::Either;
 use tz_rust::*;
 use clap::Parser;
-use clap::CommandFactory;
 use std::error::Error;
 use std::collections::HashMap;
 use std::fmt::Display;
@@ -44,7 +43,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cli = Cli::parse();
 
     if cli.dt.is_empty() {
-        println!("{}", Cli::command().render_help());
+        println!("{}", Local::now().format("%F %T %s"));
     } else {
         let dt = parse_dt_parts(&cli.dt, &tz_abbr);
         match dt {
