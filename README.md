@@ -61,6 +61,10 @@ $ tz-rust 2025-10-31 10:32 UTC
 
 Due to timezone abbreviation is not unique (For example: CST can be Central Standard Time or China Standard Time), this is optionally supported by including `tz.txt` file, where you can define alias (and thus abbreviation) of timezones. See the sample in the repo.
 
+# Download
+
+Only binary for Windows 64-bit are provided. For other operating system you need to build from the source code.
+
 # Build
 
 Rust 2024 edition and cargo are required.
