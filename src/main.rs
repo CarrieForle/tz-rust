@@ -13,9 +13,13 @@ use std::{
 #[command(version = "0.1.0")]
 #[command(about = "Timezone converter")]
 pub struct Cli {
-    #[arg(short, long, default_value_t = Mode::To)]
+    #[arg(short, long)]
+    #[arg(help = MODE_HELP)]
+    #[arg(default_value_t = Mode::To)]
     pub mode: Mode,
     #[arg(value_name = "DATETIME_PARTS")]
+    #[arg(help = "Datetime with timezone")]
+    #[arg(long_help = DT_LONG_HELP)]
     pub dt: Vec<String>,
 }
 
@@ -72,3 +76,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
+
+const MODE_HELP: &'static str = r#"Conversion direction.
+- from: From timezone to localtime.
+- to: From localtime to timezone.
+"#;
+
+const DT_LONG_HELP: &'static str = 
+r#"[DATETIME_PART] is [DATE] [TIME] [TIMEZONE] separated by space in any order.
+[DATE] is of format "yyyy-mm-dd". Year is optional.
+[TIME] is of format "HH:MM:SS [am|pm]": You can optionally suffixed with "am" or "pm", in which case it is parsed as 12-hour format and minute and second are optional. In the case where neither "am" nor "pm" are specified, it is parsed in 24-hour format and only second is optional.
+[TIMEZONE] is one of the timezone defined in IANA timezone database or an alias, which can be created by including `tz.txt` inside the program directory."#;
