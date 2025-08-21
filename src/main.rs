@@ -45,7 +45,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         .map(|mut p| {
             let _ = p.pop();
             p.push("tz.txt");
-            println!("{}", p.to_str().unwrap());
             read_tz_abbr(p).unwrap_or(HashMap::new())
         }).unwrap();
 
