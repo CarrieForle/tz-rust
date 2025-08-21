@@ -3,9 +3,7 @@ use either::Either;
 use tz_rust::*;
 use clap::{ValueEnum, Parser};
 use std::{
-    error::Error,
-    collections::HashMap,
-    fmt::Display,
+    collections::HashMap, env, error::Error, fmt::Display
 };
 
 #[derive(Parser)]
@@ -43,7 +41,14 @@ impl Display for Mode {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let tz_abbr = read_tz_abbr("tz.txt").unwrap_or(HashMap::new());
+    let tz_abbr = env::current_exe()
+        .map(|mut p| {
+            let _ = p.pop();
+            p.push("tz.txt");
+            println!("{}", p.to_str().unwrap());
+            read_tz_abbr(p).unwrap_or(HashMap::new())
+        }).unwrap();
+
     let cli = Cli::parse();
 
     if cli.dt.is_empty() {
