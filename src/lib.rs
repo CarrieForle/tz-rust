@@ -3,14 +3,13 @@ use chrono::{
     prelude::*,
 };
 use chrono_tz::Tz;
-use either::Either;
 use std::{
     collections::HashMap,
     path::Path,
     error::Error,
 };
 
-pub fn parse_dt_parts(parts: &[String], tz_abbr: &HashMap<String, String>) -> Result<(NaiveDateTime, Either<Tz, Local>), &'static str> {
+pub fn parse_dt_parts(parts: &[String], tz_abbr: &HashMap<String, String>) -> Result<(NaiveDateTime, Option<Tz>), &'static str> {
     let now = Local::now();
     let mut timezone: Option<Tz> = None;
     let mut date = None;
@@ -23,25 +22,28 @@ pub fn parse_dt_parts(parts: &[String], tz_abbr: &HashMap<String, String>) -> Re
             continue;
         }
 
-        if let Some(tz) = try_parse_timezone(part, tz_abbr) && let None = timezone {
+        if timezone.is_none() && let Some(tz) = try_parse_timezone(part, tz_abbr) {
             timezone = Some(tz);
-        } else if let Some(d) = try_parse_date(&part) && let None = date {
+        } else if date.is_none() && let Some(d) = try_parse_date(part, &now) {
             date = Some(d);
-        } else if let None = time {
+        } else if time.is_none() {
             let mut t = None;
 
             if i + 1 < parts.len() {
                 t = try_parse_time(&format!("{}{}", part, parts[i + 1]));
             }
             
-            let p = t.is_some();
-            t = t.or(try_parse_time(part));
-
             if t.is_some() {
                 time = t;
-                pass = p;
+                pass = true;
             } else {
-                Err("Invalid datetime")?;
+                t = t.or(try_parse_time(part));
+
+                if t.is_some() {
+                    time = t;
+                } else {
+                    Err("Invalid datetime")?;
+                }
             }
         } else {
             Err("Invalid datetime")?;
@@ -51,12 +53,8 @@ pub fn parse_dt_parts(parts: &[String], tz_abbr: &HashMap<String, String>) -> Re
     let date = date.unwrap_or(now.date_naive());
     let time = time.unwrap_or(now.time());
     let datetime = NaiveDateTime::new(date, time);
-
-    if let Some(tz) = timezone {
-        Ok((datetime, Either::Left(tz)))
-    } else {
-        Ok((datetime, Either::Right(Local)))
-    }
+    
+    Ok((datetime, timezone))
 }
 
 fn try_parse_timezone(timezone: &str, tz_abbr: &HashMap<String, String>) -> Option<Tz> {
@@ -68,20 +66,21 @@ fn try_parse_timezone(timezone: &str, tz_abbr: &HashMap<String, String>) -> Opti
 }
 
 fn try_parse_time(time: &str) -> Option<NaiveTime> {
-    if time.len() == 3 || time.len() == 4 {
-        return NaiveTime::parse_from_str(&format!("00{time}"), "%M%I%P").ok();
-    }
-
-    NaiveTime::parse_from_str(&time, "%H:%M:%S")
-        .or(NaiveTime::parse_from_str(&time, "%H:%M"))
-        .or(NaiveTime::parse_from_str(&time, "%I:%M:%S%P"))
-        .or(NaiveTime::parse_from_str(&time, "%I:%M%P"))
+    NaiveTime::parse_from_str(time, "%H:%M:%S")
+        .or(NaiveTime::parse_from_str(time, "%H:%M"))
+        .or(NaiveTime::parse_from_str(time, "%H%M"))
+        .or(NaiveTime::parse_from_str(time, "%I:%M:%S%P"))
+        .or(NaiveTime::parse_from_str(time, "%I:%M%P"))
         .ok()
 }
 
-fn try_parse_date(date: &str) -> Option<NaiveDate> {
-    NaiveDate::parse_from_str(&date,"%m-%d")
-        .or(NaiveDate::parse_from_str(&date, "%Y-%m-%d"))
+fn try_parse_date(date: &str, now: &DateTime<Local>) -> Option<NaiveDate> {
+    NaiveDate::parse_from_str(&format!("{}-{date}", now.year()), "%Y-%m-%d")
+        .or(NaiveDate::parse_from_str(date, "%Y-%m-%d"))
+        .or(NaiveDate::parse_from_str(date, "%y-%m-%d"))
+        .or(NaiveDate::parse_from_str(&format!("{}/{date}", now.year()), "%Y/%m/%d"))
+        .or(NaiveDate::parse_from_str(date, "%Y/%m/%d"))
+        .or(NaiveDate::parse_from_str(date, "%y/%m/%d"))
         .ok()
 }
 
