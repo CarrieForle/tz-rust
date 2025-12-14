@@ -1,6 +1,6 @@
-# rust-tz
+# tz-rust
 
-**A** timezone conversion CLI tool.
+A timezone conversion CLI tool.
 
 This is a rewrite of my [old tools](https://github.com/CarrieForle/time-utility).
 
@@ -54,4 +54,5 @@ Rust 2024 edition and cargo are required.
 
 ```sh
 cargo build -r
+
 ```
