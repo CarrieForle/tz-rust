@@ -37,7 +37,7 @@ pub fn parse_dt_parts(parts: &[String], tz_abbr: &HashMap<String, String>) -> Re
                 time = t;
                 pass = true;
             } else {
-                t = t.or(try_parse_time(part));
+                t = t.or_else(|| try_parse_time(part));
 
                 if t.is_some() {
                     time = t;
@@ -50,8 +50,8 @@ pub fn parse_dt_parts(parts: &[String], tz_abbr: &HashMap<String, String>) -> Re
         }
     }
     
-    let date = date.unwrap_or(now.date_naive());
-    let time = time.unwrap_or(now.time());
+    let date = date.unwrap_or_else(|| now.date_naive());
+    let time = time.unwrap_or_else(|| now.time());
     let datetime = NaiveDateTime::new(date, time);
     
     Ok((datetime, timezone))
@@ -86,21 +86,20 @@ fn try_parse_time(time: &str) -> Option<NaiveTime> {
 
 fn try_parse_date(date: &str, now: &DateTime<Local>) -> Option<NaiveDate> {
     NaiveDate::parse_from_str(&format!("{}-{date}", now.year()), "%Y-%m-%d")
-        .or(NaiveDate::parse_from_str(date, "%Y-%m-%d"))
-        .or(NaiveDate::parse_from_str(date, "%y-%m-%d"))
-        .or(NaiveDate::parse_from_str(&format!("{}/{date}", now.year()), "%Y/%m/%d"))
-        .or(NaiveDate::parse_from_str(date, "%Y/%m/%d"))
-        .or(NaiveDate::parse_from_str(date, "%y/%m/%d"))
+        .or_else(|_| NaiveDate::parse_from_str(date, "%Y-%m-%d"))
+        .or_else(|_| NaiveDate::parse_from_str(date, "%y-%m-%d"))
+        .or_else(|_| NaiveDate::parse_from_str(&format!("{}/{date}", now.year()), "%Y/%m/%d"))
+        .or_else(|_| NaiveDate::parse_from_str(date, "%Y/%m/%d"))
+        .or_else(|_| NaiveDate::parse_from_str(date, "%y/%m/%d"))
         .ok()
 }
 
 pub fn read_tz_abbr<P: AsRef<Path>>(path: P) -> Result<HashMap<String, String>, Box<dyn Error>> {
     let contents = std::fs::read_to_string(path)?;
     let mut map = HashMap::new();
-    const ERROR: &str = "Invalid format";
 
     for line in contents.lines() {
-        let (key, val) = line.split_once('=').ok_or(ERROR)?;
+        let (key, val) = line.split_once('=').ok_or("Invalid format")?;
         map.insert(key.to_string(), val.to_string());
     }
 

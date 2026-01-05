@@ -50,7 +50,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .map(|mut p| {
             let _ = p.pop();
             p.push("tz.txt");
-            read_tz_abbr(p).unwrap_or(HashMap::new())
+            read_tz_abbr(p).unwrap_or_else(|_| HashMap::new())
         })?;
 
     let cli = Cli::parse();
