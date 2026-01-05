@@ -67,10 +67,20 @@ fn try_parse_timezone(timezone: &str, tz_abbr: &HashMap<String, String>) -> Opti
 
 fn try_parse_time(time: &str) -> Option<NaiveTime> {
     NaiveTime::parse_from_str(time, "%H:%M:%S")
-        .or(NaiveTime::parse_from_str(time, "%H:%M"))
-        .or(NaiveTime::parse_from_str(time, "%H%M"))
-        .or(NaiveTime::parse_from_str(time, "%I:%M:%S%P"))
-        .or(NaiveTime::parse_from_str(time, "%I:%M%P"))
+        .or_else(|_| NaiveTime::parse_from_str(time, "%H:%M"))
+        .or_else(|_| NaiveTime::parse_from_str(time, "%H%M"))
+        .or_else(|_| NaiveTime::parse_from_str(time, "%I:%M:%S%P"))
+        .or_else(|_| NaiveTime::parse_from_str(time, "%I:%M%P"))
+        .or_else(|_| {
+            if !time.is_ascii() {
+                return Err(())
+            }
+
+            let (hour, ampm) = time.split_at(time.len() - 2);
+
+            NaiveTime::parse_from_str(&format!("{hour}00{ampm}"), "%I%M%P")
+                .or(Err(()))
+        })
         .ok()
 }
 
