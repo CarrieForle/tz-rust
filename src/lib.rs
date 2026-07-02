@@ -78,7 +78,7 @@ fn try_parse_time(time: &str) -> Option<NaiveTime> {
 
             let (hour, ampm) = time.split_at(time.len() - 2);
 
-            NaiveTime::parse_from_str(&format!("{hour}00{ampm}"), "%I%M%P")
+            NaiveTime::parse_from_str(&format!("{hour} 00 {ampm}"), "%I %M %P")
                 .or(Err(()))
         })
         .ok()
