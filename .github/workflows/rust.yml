@@ -41,12 +41,16 @@ jobs:
     - uses: actions/upload-artifact@v7
       id: artifact
       with: 
-        path: target/**/release/tz(.exe)?
+        path: |
+          target/**/release/tz.exe
+          target/**/release/tz
         if-no-files-found: error
     - uses: actions/attest@v4
       id: attest
       with:
-        subject-path: target/**/release/tz(.exe)?
+        subject-path: |
+          target/**/release/tz.exe
+          target/**/release/tz
   release:
     runs-on: ubuntu-latest
     needs: build
