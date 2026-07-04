@@ -10,8 +10,14 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - run: cargo check --verbose
   build:
     runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
     steps:
     - uses: actions/checkout@v7
     - run: cargo install cross --git https://github.com/cross-rs/cross
