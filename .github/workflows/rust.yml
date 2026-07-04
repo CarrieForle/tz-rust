@@ -14,13 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
+    - run: cargo install cross --git https://github.com/cross-rs/cross
+    - run: sudo systemctl start docker
     - run: >
-        rustup target add 
-        x86_64-unknown-linux-gnu
-        x86_64-pc-windows-gnu
-        aarch64-apple-darwin
-    - run: >
-        cargo build --verbose --release
+        cross build --verbose --release
         --target x86_64-unknown-linux-gnu
         --target x86_64-pc-windows-gnu
         --target aarch64-apple-darwin
