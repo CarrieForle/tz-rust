@@ -14,4 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
-    - run: cargo check --verbose
+    - run: >
+        cargo build --verbose --release
+        --target x86_64-unknown-linux-gnu
+        --target x86_64-pc-windows-msvc
+        --target aarch64-apple-darwin
